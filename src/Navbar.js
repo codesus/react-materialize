@@ -3,8 +3,47 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 import Icon from './Icon';
 import SearchForm from './SearchForm';
+import NavItem from './NavItem';
 
+const NavbarContext = React.createContext(null);
+class NavWrapper extends Component {
+  render() {
+    const { className, children } = this.props;
+    return (
+      <div className={cx('nav-wrapper', className)}>
+        {this.context.renderWrapper(children)}
+      </div>
+    );
+  }
+}
+NavWrapper.contextType = NavbarContext;
+NavWrapper.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node
+};
 class Navbar extends Component {
+  constructor(props) {
+    super(props);
+    const {
+      children,
+      brand,
+      className,
+      extendWith,
+      fixed,
+      alignLinks,
+      centerLogo,
+      search,
+      menuIcon,
+      sidenav
+    } = props;
+    this.brandClasses = cx({
+      'brand-logo': true,
+      center: centerLogo
+    });
+    this.navCSS = cx({ 'nav-extended': extendWith }, className);
+
+    this.navMobileCSS = cx('hide-on-med-and-down', [alignLinks]);
+  }
   componentDidMount() {
     const { options } = this.props;
 
@@ -18,34 +57,35 @@ class Navbar extends Component {
       this.instance.destroy();
     }
   }
-
+  renderWrapper(items) {
+    return (
+      <Fragment>
+        {this.props.search ? (
+          <SearchForm />
+        ) : (
+          <Fragment>
+            {this.props.brand &&
+              React.cloneElement(this.props.brand, {
+                className: cx(
+                  this.props.brand.props.className,
+                  this.brandClasses
+                )
+              })}
+            <a href="#!" data-target="mobile-nav" className="sidenav-trigger">
+              {this.props.menuIcon}
+            </a>
+            <ul className={this.navMobileCSS}>
+              {Children.map(items, (link, index) => (
+                <li key={index}>{link}</li>
+              ))}
+            </ul>
+          </Fragment>
+        )}
+      </Fragment>
+    );
+  }
   render() {
-    const {
-      children,
-      brand,
-      className,
-      extendWith,
-      fixed,
-      alignLinks,
-      centerLogo,
-      search,
-      menuIcon,
-      sidenav
-    } = this.props;
-
-    const brandClasses = cx({
-      'brand-logo': true,
-      center: centerLogo
-    });
-
-    const navCSS = cx({ 'nav-extended': extendWith }, className);
-
-    const navMobileCSS = cx('hide-on-med-and-down', [alignLinks]);
-
-    const links = Children.map(children, (link, index) => (
-      <li key={index}>{link}</li>
-    ));
-
+    const { sidenav, children, extendWith, fixed, alignLinks } = this.props;
     const sidenavLinks = sidenav
       ? sidenav
       : Children.map(children, (link, index) => {
@@ -60,23 +100,8 @@ class Navbar extends Component {
         });
 
     let navbar = (
-      <nav className={navCSS}>
-        <div className="nav-wrapper">
-          {search ? (
-            <SearchForm />
-          ) : (
-            <Fragment>
-              {brand &&
-                React.cloneElement(brand, {
-                  className: cx(brand.props.className, brandClasses)
-                })}
-              <a href="#!" data-target="mobile-nav" className="sidenav-trigger">
-                {menuIcon}
-              </a>
-              <ul className={navMobileCSS}>{links}</ul>
-            </Fragment>
-          )}
-        </div>
+      <nav className={this.navCSS}>
+        {children}
         {extendWith && <div className="nav-content">{extendWith}</div>}
       </nav>
     );
@@ -86,9 +111,8 @@ class Navbar extends Component {
     }
 
     return (
-      <Fragment>
+      <NavbarContext.Provider value={this}>
         {navbar}
-
         <ul
           id="mobile-nav"
           className={cx('sidenav', [alignLinks])}
@@ -98,7 +122,7 @@ class Navbar extends Component {
         >
           {sidenavLinks}
         </ul>
-      </Fragment>
+      </NavbarContext.Provider>
     );
   }
 }
@@ -168,4 +192,6 @@ Navbar.defaultProps = {
   menuIcon: <Icon>menu</Icon>
 };
 
+Navbar.Wrapper = NavWrapper;
+Navbar.Item = NavItem;
 export default Navbar;
