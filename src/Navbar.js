@@ -2,25 +2,11 @@ import React, { Component, Fragment, Children } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import Icon from './Icon';
+import NavWrapper from './NavWrapper';
 import SearchForm from './SearchForm';
 import NavItem from './NavItem';
+import { NavbarContext } from './NavbarContext';
 
-const NavbarContext = React.createContext(null);
-class NavWrapper extends Component {
-  render() {
-    const { className, children } = this.props;
-    return (
-      <div className={cx('nav-wrapper', className)}>
-        {this.context.renderWrapper(children)}
-      </div>
-    );
-  }
-}
-NavWrapper.contextType = NavbarContext;
-NavWrapper.propTypes = {
-  className: PropTypes.string,
-  children: PropTypes.node
-};
 class Navbar extends Component {
   constructor(props) {
     super(props);
@@ -192,6 +178,4 @@ Navbar.defaultProps = {
   menuIcon: <Icon>menu</Icon>
 };
 
-Navbar.Wrapper = NavWrapper;
-Navbar.Item = NavItem;
 export default Navbar;

@@ -24,6 +24,7 @@ export { default as MediaBox } from './MediaBox';
 export { default as Modal } from './Modal';
 export { default as NavItem } from './NavItem';
 export { default as Navbar } from './Navbar';
+export { default as NavWrapper } from './NavWrapper';
 export { default as Pagination } from './Pagination';
 export { default as PaginationButton } from './PaginationButton';
 export { default as Parallax } from './Parallax';
