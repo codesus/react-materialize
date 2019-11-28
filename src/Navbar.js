@@ -2,11 +2,7 @@ import React, { Component, Fragment, Children } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import Icon from './Icon';
-import NavWrapper from './NavWrapper';
-import SearchForm from './SearchForm';
-import NavItem from './NavItem';
 import { NavbarContext } from './NavbarContext';
-
 class Navbar extends Component {
   constructor(props) {
     super(props);
@@ -22,13 +18,14 @@ class Navbar extends Component {
       menuIcon,
       sidenav
     } = props;
-    this.brandClasses = cx({
+    this.sharedProps = { ...props };
+    this.sharedProps.brandClasses = cx({
       'brand-logo': true,
       center: centerLogo
     });
-    this.navCSS = cx({ 'nav-extended': extendWith }, className);
-
-    this.navMobileCSS = cx('hide-on-med-and-down', [alignLinks]);
+    this.sharedProps.navCSS = cx({ 'nav-extended': extendWith }, className);
+    this.sharedProps.navMobileCSS = cx('hide-on-med-and-down', [alignLinks]);
+    delete this.sharedProps.children;
   }
   componentDidMount() {
     const { options } = this.props;
@@ -42,33 +39,6 @@ class Navbar extends Component {
     if (this.instance) {
       this.instance.destroy();
     }
-  }
-  renderWrapper(items) {
-    return (
-      <Fragment>
-        {this.props.search ? (
-          <SearchForm />
-        ) : (
-          <Fragment>
-            {this.props.brand &&
-              React.cloneElement(this.props.brand, {
-                className: cx(
-                  this.props.brand.props.className,
-                  this.brandClasses
-                )
-              })}
-            <a href="#!" data-target="mobile-nav" className="sidenav-trigger">
-              {this.props.menuIcon}
-            </a>
-            <ul className={this.navMobileCSS}>
-              {Children.map(items, (link, index) => (
-                <li key={index}>{link}</li>
-              ))}
-            </ul>
-          </Fragment>
-        )}
-      </Fragment>
-    );
   }
   render() {
     const { sidenav, children, extendWith, fixed, alignLinks } = this.props;
@@ -86,7 +56,7 @@ class Navbar extends Component {
         });
 
     let navbar = (
-      <nav className={this.navCSS}>
+      <nav className={this.sharedProps.navCSS}>
         {children}
         {extendWith && <div className="nav-content">{extendWith}</div>}
       </nav>
@@ -95,9 +65,8 @@ class Navbar extends Component {
     if (fixed) {
       navbar = <div className="navbar-fixed">{navbar}</div>;
     }
-
     return (
-      <NavbarContext.Provider value={this}>
+      <NavbarContext.Provider value={this.sharedProps}>
         {navbar}
         <ul
           id="mobile-nav"
